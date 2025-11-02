@@ -26,14 +26,11 @@ function buildFeatureFlags(args) {
         fakeip: "fakeIPEnabled",
         quic: "quicEnabled"
     };
-
     const flags = Object.entries(spec).reduce((acc, [sourceKey, targetKey]) => {
         acc[targetKey] = parseBool(args[sourceKey]);
         return acc;
     }, {});
-
     flags.countryThreshold = parseNumber(args.threshold, 0);
-
     return flags;
 }
 
@@ -80,7 +77,6 @@ function buildBaseLists({ landing, lowCost, countryGroupNames }) {
         PROXY_GROUPS.MANUAL,
         "DIRECT"
     );
-
     const defaultProxies = buildList(
         PROXY_GROUPS.SELECT,
         countryGroupNames,
@@ -88,7 +84,6 @@ function buildBaseLists({ landing, lowCost, countryGroupNames }) {
         PROXY_GROUPS.MANUAL,
         PROXY_GROUPS.DIRECT
     );
-
     const defaultProxiesDirect = buildList(
         PROXY_GROUPS.DIRECT,
         countryGroupNames,
@@ -96,7 +91,6 @@ function buildBaseLists({ landing, lowCost, countryGroupNames }) {
         PROXY_GROUPS.SELECT,
         PROXY_GROUPS.MANUAL
     );
-
     const defaultFallback = buildList(
         landing && PROXY_GROUPS.LANDING,
         countryGroupNames,
@@ -104,7 +98,6 @@ function buildBaseLists({ landing, lowCost, countryGroupNames }) {
         PROXY_GROUPS.MANUAL,
         "DIRECT"
     );
-
     return { defaultProxies, defaultProxiesDirect, defaultSelector, defaultFallback };
 }
 
@@ -366,9 +359,7 @@ function hasLowCost(config) {
 function parseCountries(config) {
     const proxies = config.proxies || [];
     const ispRegex = /家宽|家庭|家庭宽带|商宽|商业宽带|星链|Starlink|落地/i;
-
     const countryCounts = Object.create(null);
-
     const compiledRegex = {};
     for (const [country, meta] of Object.entries(countriesMeta)) {
         compiledRegex[country] = new RegExp(
@@ -376,7 +367,6 @@ function parseCountries(config) {
             'i'
         );
     }
-
     for (const proxy of proxies) {
         const name = proxy.name || '';
         if (ispRegex.test(name)) continue;
@@ -387,7 +377,6 @@ function parseCountries(config) {
             }
         }
     }
-
     const result = [];
     for (const [country, count] of Object.entries(countryCounts)) {
         result.push({ country, count });
@@ -395,17 +384,14 @@ function parseCountries(config) {
     return result;
 }
 
-
 function buildCountryProxyGroups({ countries, landing, loadBalance }) {
     const groups = [];
     const baseExcludeFilter = "0\\.[0-5]|低倍率|省流|大流量|实验性";
     const landingExcludeFilter = "(?i)家宽|家庭|家庭宽带|商宽|商业宽带|星链|Starlink|落地";
     const groupType = loadBalance ? "load-balance" : "url-test";
-
     for (const country of countries) {
         const meta = countriesMeta[country];
         if (!meta) continue;
-
         const groupConfig = {
             "name": `${country}${NODE_SUFFIX}`,
             "icon": meta.icon,
@@ -414,7 +400,6 @@ function buildCountryProxyGroups({ countries, landing, loadBalance }) {
             "exclude-filter": landing ? `${landingExcludeFilter}|${baseExcludeFilter}` : baseExcludeFilter,
             "type": groupType
         };
-
         if (!loadBalance) {
             Object.assign(groupConfig, {
                 "url": "https://cp.cloudflare.com/generate_204",
@@ -423,10 +408,8 @@ function buildCountryProxyGroups({ countries, landing, loadBalance }) {
                 "lazy": false
             });
         }
-
         groups.push(groupConfig);
     }
-
     return groups;
 }
 
@@ -446,7 +429,6 @@ function buildProxyGroups({
     const frontProxySelector = landing
         ? defaultSelector.filter(name => name !== PROXY_GROUPS.LANDING && name !== PROXY_GROUPS.FALLBACK)
         : [];
-
     return [
         {
             "name": PROXY_GROUPS.SELECT,
@@ -567,16 +549,13 @@ function main(config) {
     const lowCost = hasLowCost(resultConfig);
     const countryGroupNames = getCountryGroupNames(countryInfo, countryThreshold);
     const countries = stripNodeSuffix(countryGroupNames);
-
     const {
         defaultProxies,
         defaultProxiesDirect,
         defaultSelector,
         defaultFallback
     } = buildBaseLists({ landing, lowCost, countryGroupNames });
-
     const countryProxyGroups = buildCountryProxyGroups({ countries, landing, loadBalance });
-
     const proxyGroups = buildProxyGroups({
         landing,
         countries,
@@ -587,7 +566,6 @@ function main(config) {
         defaultSelector,
         defaultFallback
     });
-    
     const globalProxies = proxyGroups.map(item => item.name);  
     proxyGroups.push(
         {
@@ -598,9 +576,7 @@ function main(config) {
             "proxies": globalProxies
         }
     );
-
     const finalRules = buildRules({ quicEnabled });
-
     if (fullConfig) Object.assign(resultConfig, {
         "mixed-port": 7890,
         "redir-port": 7892,
@@ -620,7 +596,6 @@ function main(config) {
             "store-selected": true,
         }
     });
-
     Object.assign(resultConfig, {
         "proxy-groups": proxyGroups,
         "rule-providers": ruleProviders,
@@ -630,6 +605,5 @@ function main(config) {
         "geodata-mode": true,
         "geox-url": geoxURL,
     });
-
     return resultConfig;
 }
