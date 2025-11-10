@@ -4,7 +4,7 @@ nameserver:
 
 proxy-providers:
   飞鸟:
-    url: "http://10.0.0.1:3001/CKg2abstVnOeRpm1aB4G/download/FN"
+    url: "http://10.0.0.1:3001/"
     type: http
     interval: 86400
     health-check:
@@ -13,7 +13,7 @@ proxy-providers:
       interval: 300
     proxy: 直连
   阅后即焚:
-    url: "http://10.0.0.1:3001/CKg2abstVnOeRpm1aB4G/download/collection/%E9%98%85%E5%90%8E%E5%8D%B3%E7%84%9A"
+    url: "http://10.0.0.1:3001"
     type: http
     interval: 0
     health-check:
@@ -21,6 +21,7 @@ proxy-providers:
       url: https://www.gstatic.com/generate_204
       interval: 300
     proxy: 直连
+
 proxies:
   - {name: 直连, type: direct}
 
@@ -39,6 +40,7 @@ find-process-mode: 'off'
 global-client-fingerprint: chrome
 keep-alive-idle: 600
 keep-alive-interval: 15
+
 profile:
   store-selected: true
   store-fake-ip: true
@@ -137,6 +139,7 @@ rule-anchor:
   ip: &ip {type: http, interval: 86400, behavior: ipcidr, format: mrs}
   domain: &domain {type: http, interval: 86400, behavior: domain, format: mrs}
   class: &class {type: http, interval: 86400, behavior: classical, format: text}
+
 rule-providers: 
   private_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/private.mrs"}
   proxylite: { <<: *class, url: "https://raw.githubusercontent.com/qichiyuhub/rule/refs/heads/main/proxy.list"}
